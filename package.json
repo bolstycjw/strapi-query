@@ -1,0 +1,40 @@
+{
+  "name": "strapi-query",
+  "version": "0.1.0",
+  "description": "Schema-first typed query client for Strapi REST APIs.",
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.typecheck.json --noEmit"
+  },
+  "keywords": [
+    "strapi",
+    "typescript",
+    "typed-client",
+    "rest",
+    "query"
+  ],
+  "peerDependencies": {
+    "typescript": ">=5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
