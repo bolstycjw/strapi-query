@@ -196,6 +196,16 @@ export interface Pagination {
   start?: number;
 }
 
+export type PublicationFilter =
+  | 'never-published'
+  | 'has-published-version'
+  | 'modified'
+  | 'unmodified'
+  | 'never-published-document'
+  | 'has-published-version-document'
+  | 'published-without-draft'
+  | 'published-with-draft';
+
 export interface Query<
   Schema extends SchemaDefinition,
   Key extends keyof Schema,
@@ -208,6 +218,7 @@ export interface Query<
   pagination?: Pagination;
   status?: 'draft' | 'published';
   publicationState?: 'live' | 'preview';
+  publicationFilter?: PublicationFilter;
   locale?: string | string[];
 }
 

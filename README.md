@@ -87,7 +87,8 @@ const articles = await strapi.collection('article').findMany({
     themes: true
   },
   sort: ['publishedAt:desc'],
-  pagination: { page: 1, pageSize: 10 }
+  pagination: { page: 1, pageSize: 10 },
+  publicationFilter: 'has-published-version'
 });
 ```
 

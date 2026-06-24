@@ -1,5 +1,5 @@
 import { collection, defineSchema, entity, many, one, single } from './index.js';
-import type { Entity, Populated } from './index.js';
+import type { Entity, Populated, Query } from './index.js';
 import type { Relations } from './types.js';
 
 interface Article {
@@ -49,6 +49,7 @@ type PlainArticle = Entity<typeof schema, 'article'>;
 type PlainUpload = Entity<typeof schema, 'uploadFile'>;
 type ArticleCard = Populated<typeof schema, 'article', { cover: true; themes: true }>;
 type ArticleRelations = Relations<typeof schema, 'article'>;
+type ArticleQuery = Query<typeof schema, 'article'>;
 
 declare const plainArticle: PlainArticle;
 declare const plainUpload: PlainUpload;
@@ -60,3 +61,9 @@ plainUpload.url satisfies string;
 coverRelation.target satisfies 'uploadFile';
 articleCard.cover?.url satisfies string | undefined;
 articleCard.themes[0]?.uid satisfies string | undefined;
+
+const publicationFilterQuery = {
+  publicationFilter: 'has-published-version'
+} satisfies ArticleQuery;
+
+publicationFilterQuery.publicationFilter satisfies 'has-published-version';

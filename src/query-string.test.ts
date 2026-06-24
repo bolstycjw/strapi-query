@@ -15,7 +15,8 @@ describe('stringifyQuery', () => {
         }
       },
       sort: ['publishedAt:desc'],
-      pagination: { page: 1, pageSize: 10 }
+      pagination: { page: 1, pageSize: 10 },
+      publicationFilter: 'has-published-version'
     });
 
     expect(decodeURIComponent(query)).toContain('filters[slug][$eq]=best-reits');
@@ -24,5 +25,6 @@ describe('stringifyQuery', () => {
     expect(decodeURIComponent(query)).toContain('populate[themes][fields][0]=name');
     expect(decodeURIComponent(query)).toContain('sort[0]=publishedAt:desc');
     expect(decodeURIComponent(query)).toContain('pagination[page]=1');
+    expect(decodeURIComponent(query)).toContain('publicationFilter=has-published-version');
   });
 });

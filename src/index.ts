@@ -19,6 +19,7 @@ export type {
   Pagination,
   Populate,
   Populated,
+  PublicationFilter,
   Query,
   RelationDefinitions,
   ResourceDefinition,
