@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { generateSchemaFromGraphQl, graphQlIntrospectionQuery } from './graphql.js';
+
+const defaultOutputPath = 'src/generated/strapi-schema.ts';
 
 interface CliOptions {
   graphql?: string;
@@ -36,13 +39,15 @@ async function main() {
     ...(options.importFrom ? { importFrom: options.importFrom } : {}),
     ...(options.schemaName ? { schemaExportName: options.schemaName } : {})
   });
+  const outputPath = options.out ?? defaultOutputPath;
 
-  if (options.out) {
-    await writeFile(options.out, output);
+  if (outputPath === '-') {
+    process.stdout.write(output);
     return;
   }
 
-  process.stdout.write(output);
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, output);
 }
 
 function parseArgs(args: string[]): CliOptions {
@@ -133,13 +138,13 @@ async function fetchGraphQlIntrospection(options: CliOptions) {
 
 function usage() {
   return `Usage:
-  strapi-query generate --graphql ./graphql-introspection.json --out ./src/strapi-schema.ts
-  strapi-query generate --graphql-url https://cms.example.com/graphql --token $STRAPI_TOKEN --out ./src/strapi-schema.ts
+  strapi-query generate --graphql-url https://cms.example.com/graphql --token $STRAPI_TOKEN
+  strapi-query generate --graphql ./graphql-introspection.json --out ./src/generated/strapi-schema.ts
 
 Options:
   --graphql <file>       Read a GraphQL introspection JSON result from disk.
   --graphql-url <url>    Fetch GraphQL introspection from an endpoint.
-  --out <file>           Write generated TypeScript to a file. Defaults to stdout.
+  --out <file>           Write generated TypeScript to a file. Defaults to ${defaultOutputPath}. Use - for stdout.
   --token <token>        Bearer token for --graphql-url.
   --header "Name: Val"   Extra fetch header for --graphql-url. May be repeated.
   --import-from <name>   Import helpers from this module. Defaults to strapi-query.
