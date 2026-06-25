@@ -31,14 +31,31 @@ export type SingleKey<Schema extends SchemaDefinition> = {
 export type Entity<Schema extends SchemaDefinition, Key extends keyof Schema> = Schema[Key] extends ResourceDefinition<infer ResourceEntity, RelationDefinitions, 'collection' | 'single'> ? ResourceEntity : never;
 export type Relations<Schema extends SchemaDefinition, Key extends keyof Schema> = Schema[Key] extends ResourceDefinition<unknown, infer ResourceRelations, 'collection' | 'single'> ? ResourceRelations : never;
 type StringKeyOf<T> = Extract<keyof T, string>;
+type Defined<T> = Exclude<T, undefined>;
 type TargetKey<Schema extends SchemaDefinition, Relation extends RelationDefinition> = Relation extends OneRelation<infer Target> ? Extract<Target, keyof Schema> : Relation extends ManyRelation<infer Target> ? Extract<Target, keyof Schema> : never;
 type RelationValue<Schema extends SchemaDefinition, Relation extends RelationDefinition, PopulateValue> = Relation extends OneRelation ? Populated<Schema, TargetKey<Schema, Relation>, NestedPopulate<PopulateValue>> | null : Relation extends ManyRelation ? Populated<Schema, TargetKey<Schema, Relation>, NestedPopulate<PopulateValue>>[] : never;
 type NestedPopulate<PopulateValue> = PopulateValue extends {
     populate: infer Nested;
 } ? Nested : never;
+type ComponentPopulateTarget<Value> = NonNullable<Value> extends Primitive ? never : NonNullable<Value> extends readonly (infer Item)[] ? NonNullable<Item> extends Primitive ? never : NonNullable<Item> extends object ? NonNullable<Item> : never : NonNullable<Value> extends object ? NonNullable<Value> : never;
+type ComponentKey<T> = {
+    [Key in StringKeyOf<T>]: ComponentPopulateTarget<T[Key]> extends never ? never : Key;
+}[StringKeyOf<T>];
+type ComponentPopulateValue<Target> = true | {
+    fields?: readonly StringKeyOf<Target>[];
+    populate?: ComponentPopulate<Target>;
+};
+type ComponentPopulate<Target> = {
+    [Key in ComponentKey<Target>]?: ComponentPopulateValue<ComponentPopulateTarget<Target[Key]>>;
+};
 export type Populated<Schema extends SchemaDefinition, Key extends keyof Schema, PopulateShape = never> = Entity<Schema, Key> & ([PopulateShape] extends [object] ? {
     [RelationKey in Extract<keyof PopulateShape, keyof Relations<Schema, Key>>]: RelationValue<Schema, Relations<Schema, Key>[RelationKey], PopulateShape[RelationKey]>;
-} : {});
+} & PopulatedComponentFields<Entity<Schema, Key>, PopulateShape> : {});
+type PopulatedComponentFields<EntityShape, PopulateShape> = {
+    [Key in Extract<keyof PopulateShape, ComponentKey<EntityShape>>]-?: PopulatedComponentValue<EntityShape[Key], PopulateShape[Key]>;
+};
+type PopulatedComponentValue<Value, PopulateValue> = Defined<Value> extends readonly (infer Item)[] ? PopulatedComponentObject<NonNullable<Item>, PopulateValue>[] : null extends Defined<Value> ? PopulatedComponentObject<NonNullable<Defined<Value>>, PopulateValue> | null : PopulatedComponentObject<Defined<Value>, PopulateValue>;
+type PopulatedComponentObject<Value, PopulateValue> = Value extends Primitive ? Value : Value extends object ? Value & ([NestedPopulate<PopulateValue>] extends [object] ? PopulatedComponentFields<Value, NestedPopulate<PopulateValue>> : {}) : Value;
 export type FieldSelection<Schema extends SchemaDefinition, Key extends keyof Schema> = readonly StringKeyOf<Entity<Schema, Key>>[];
 export type Sort<Schema extends SchemaDefinition, Key extends keyof Schema> = StringKeyOf<Entity<Schema, Key>> | `${StringKeyOf<Entity<Schema, Key>>}:asc` | `${StringKeyOf<Entity<Schema, Key>>}:desc`;
 type Primitive = string | number | boolean | null | Date;
@@ -82,7 +99,7 @@ type PopulateRelationValue<Schema extends SchemaDefinition, Relation extends Rel
 };
 export type Populate<Schema extends SchemaDefinition, Key extends keyof Schema> = {
     [RelationKey in StringKeyOf<Relations<Schema, Key>>]?: PopulateRelationValue<Schema, Relations<Schema, Key>[RelationKey]>;
-};
+} & ComponentPopulate<Entity<Schema, Key>>;
 export interface Pagination {
     page?: number;
     pageSize?: number;
