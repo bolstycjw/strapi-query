@@ -7,7 +7,7 @@ interface Article {
   documentId: string;
   title: string;
   slug: string;
-  cta?: ComponentContentCta | null;
+  cta: ComponentContentCta | null;
 }
 
 interface Theme {
@@ -29,14 +29,14 @@ interface HomePage {
 }
 
 interface ComponentContentCta {
-  label?: string | null;
-  icon?: UploadFile | null;
-  buttons?: ComponentSharedButton[] | null;
+  label: string;
+  icon: UploadFile | null;
+  buttons: ComponentSharedButton[];
 }
 
 interface ComponentSharedButton {
-  label?: string | null;
-  url?: string | null;
+  label: string;
+  url: string;
 }
 
 const schema = defineSchema({
@@ -81,7 +81,7 @@ coverRelation.target satisfies 'uploadFile';
 articleCard.cover?.url satisfies string | undefined;
 articleCard.themes[0]?.uid satisfies string | undefined;
 articleWithCta.cta?.icon?.url satisfies string | undefined;
-articleWithCta.cta?.buttons[0]?.label satisfies string | null | undefined;
+articleWithCta.cta?.buttons[0]?.label satisfies string | undefined;
 
 const publicationFilterQuery = {
   publicationFilter: 'has-published-version'

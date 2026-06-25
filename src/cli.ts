@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from 'node:fs/promises';
 import { generateSchemaFromGraphQl, graphQlIntrospectionQuery } from './graphql.js';
+import type { GenerateSchemaNullability } from './graphql.js';
 
 interface CliOptions {
   graphql?: string;
@@ -10,6 +11,7 @@ interface CliOptions {
   headers: Record<string, string>;
   importFrom?: string;
   schemaName?: string;
+  nullability?: GenerateSchemaNullability;
   help?: boolean;
 }
 
@@ -34,7 +36,8 @@ async function main() {
     : await fetchGraphQlIntrospection(options);
   const output = generateSchemaFromGraphQl(document, {
     ...(options.importFrom ? { importFrom: options.importFrom } : {}),
-    ...(options.schemaName ? { schemaExportName: options.schemaName } : {})
+    ...(options.schemaName ? { schemaExportName: options.schemaName } : {}),
+    ...(options.nullability ? { nullability: options.nullability } : {})
   });
 
   if (options.out) {
@@ -82,6 +85,9 @@ function parseArgs(args: string[]): CliOptions {
       case '--schema-name':
         options.schemaName = readValue(args, ++index, arg);
         break;
+      case '--nullability':
+        options.nullability = parseNullability(readValue(args, ++index, arg));
+        break;
       case '--help':
       case '-h':
         options.help = true;
@@ -92,6 +98,14 @@ function parseArgs(args: string[]): CliOptions {
   }
 
   return options;
+}
+
+function parseNullability(value: string): GenerateSchemaNullability {
+  if (value === 'optimistic' || value === 'graphql') {
+    return value;
+  }
+
+  throw new Error(`Invalid --nullability value "${value}". Expected "optimistic" or "graphql".`);
 }
 
 function readValue(args: string[], index: number, flag: string) {
@@ -144,6 +158,7 @@ Options:
   --header "Name: Val"   Extra fetch header for --graphql-url. May be repeated.
   --import-from <name>   Import helpers from this module. Defaults to strapi-query.
   --schema-name <name>   Exported schema constant name. Defaults to schema.
+  --nullability <mode>   Field nullability mode: optimistic or graphql. Defaults to optimistic.
 `;
 }
 

@@ -32,7 +32,7 @@ export type {
   StrapiMeta,
   StrapiSingleResponse
 } from './types.js';
-export type { GenerateSchemaFromGraphQlOptions } from './graphql.js';
+export type { GenerateSchemaFromGraphQlOptions, GenerateSchemaNullability } from './graphql.js';
 
 export { StrapiHttpError } from './errors.js';
 export { stringifyQuery } from './query-string.js';

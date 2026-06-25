@@ -1,6 +1,6 @@
 {
   "name": "strapi-query",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Schema-first typed query client for Strapi REST APIs.",
   "type": "module",
   "license": "MIT",

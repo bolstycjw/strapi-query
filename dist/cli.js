@@ -18,7 +18,8 @@ async function main() {
         : await fetchGraphQlIntrospection(options);
     const output = generateSchemaFromGraphQl(document, {
         ...(options.importFrom ? { importFrom: options.importFrom } : {}),
-        ...(options.schemaName ? { schemaExportName: options.schemaName } : {})
+        ...(options.schemaName ? { schemaExportName: options.schemaName } : {}),
+        ...(options.nullability ? { nullability: options.nullability } : {})
     });
     if (options.out) {
         await writeFile(options.out, output);
@@ -60,6 +61,9 @@ function parseArgs(args) {
             case '--schema-name':
                 options.schemaName = readValue(args, ++index, arg);
                 break;
+            case '--nullability':
+                options.nullability = parseNullability(readValue(args, ++index, arg));
+                break;
             case '--help':
             case '-h':
                 options.help = true;
@@ -69,6 +73,12 @@ function parseArgs(args) {
         }
     }
     return options;
+}
+function parseNullability(value) {
+    if (value === 'optimistic' || value === 'graphql') {
+        return value;
+    }
+    throw new Error(`Invalid --nullability value "${value}". Expected "optimistic" or "graphql".`);
 }
 function readValue(args, index, flag) {
     const value = args[index];
@@ -113,6 +123,7 @@ Options:
   --header "Name: Val"   Extra fetch header for --graphql-url. May be repeated.
   --import-from <name>   Import helpers from this module. Defaults to strapi-query.
   --schema-name <name>   Exported schema constant name. Defaults to schema.
+  --nullability <mode>   Field nullability mode: optimistic or graphql. Defaults to optimistic.
 `;
 }
 main().catch((error) => {

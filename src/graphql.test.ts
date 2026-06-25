@@ -3,77 +3,17 @@ import { generateSchemaFromGraphQl } from './graphql.js';
 
 describe('generateSchemaFromGraphQl', () => {
   it('generates schema definitions from Strapi GraphQL introspection', () => {
-    const output = generateSchemaFromGraphQl({
-      data: {
-        __schema: {
-          queryType: { name: 'Query' },
-          types: [
-            objectType('Query', [
-              field('article', named('Article')),
-              field('articles', list(named('Article'))),
-              field('author', named('Author')),
-              field('authors', list(named('Author'))),
-              field('homePage', named('HomePage')),
-              field('mutualFunds', list(named('MutualFund'))),
-              field('themes', list(named('Theme'))),
-              field('uploadFiles', list(named('UploadFile'))),
-              field('usersPermissionsUsers', list(named('UsersPermissionsUser')))
-            ]),
-            objectType('Article', [
-              field('documentId', nonNull(named('ID'))),
-              field('title', nonNull(named('String'))),
-              field('accessTier', nonNull(named('ENUM_ARTICLE_ACCESSTIER'))),
-              field('cover', named('UploadFile')),
-              field('themes_connection', named('ThemeRelationResponseCollection')),
-              field('themes', nonNull(list(named('Theme')))),
-              field('author', named('Author')),
-              field('cta', named('ComponentContentCta')),
-              field('listedMutualFunds', list(named('MutualFund'))),
-              field('publishedAt', named('DateTime'))
-            ]),
-            objectType('Author', [
-              field('documentId', nonNull(named('ID'))),
-              field('name', nonNull(named('String')))
-            ]),
-            objectType('Theme', [
-              field('documentId', nonNull(named('ID'))),
-              field('uid', nonNull(named('String'))),
-              field('articles', list(named('Article')))
-            ]),
-            objectType('MutualFund', [
-              field('documentId', nonNull(named('ID'))),
-              field('name', named('String'))
-            ]),
-            objectType('UploadFile', [
-              field('documentId', nonNull(named('ID'))),
-              field('url', nonNull(named('String'))),
-              field('alternativeText', named('String'))
-            ]),
-            objectType('HomePage', [
-              field('documentId', nonNull(named('ID'))),
-              field('featuredArticle', named('Article'))
-            ]),
-            objectType('ComponentContentCta', [
-              field('label', named('String')),
-              field('url', named('String')),
-              field('icon', named('UploadFile'))
-            ]),
-            objectType('ThemeRelationResponseCollection', []),
-            objectType('UsersPermissionsUser', [
-              field('id', named('ID')),
-              field('username', named('String'))
-            ]),
-            enumType('ENUM_ARTICLE_ACCESSTIER', ['free', 'pro'])
-          ]
-        }
-      }
-    });
+    const output = generateSchemaFromGraphQl(strapiIntrospection());
 
     expect(output).toContain('export interface Article {');
     expect(output).toContain('title: string;');
     expect(output).toContain('accessTier: "free" | "pro";');
-    expect(output).toContain('cta?: ComponentContentCta | null;');
-    expect(output).toContain('publishedAt?: string | null;');
+    expect(output).toContain('cta: ComponentContentCta | null;');
+    expect(output).toContain('publishedAt: string;');
+    expect(output).toContain('label: string;');
+    expect(output).toContain('icon: UploadFile | null;');
+    expect(output).not.toContain('publishedAt?:');
+    expect(output).not.toContain('publishedAt: string | null;');
     expect(output).not.toContain('cover?:');
     expect(output).not.toContain('themes_connection');
     expect(output).not.toContain('listedMutualFunds?:');
@@ -88,7 +28,84 @@ describe('generateSchemaFromGraphQl', () => {
     expect(output).toContain("uploadFile: collection('upload/files', {");
     expect(output).not.toContain('usersPermissionsUser');
   });
+
+  it('can preserve GraphQL nullability when requested', () => {
+    const output = generateSchemaFromGraphQl(strapiIntrospection(), { nullability: 'graphql' });
+
+    expect(output).toContain('cta?: ComponentContentCta | null;');
+    expect(output).toContain('publishedAt?: string | null;');
+    expect(output).toContain('label?: string | null;');
+    expect(output).toContain('icon?: UploadFile | null;');
+  });
 });
+
+function strapiIntrospection() {
+  return {
+    data: {
+      __schema: {
+        queryType: { name: 'Query' },
+        types: [
+          objectType('Query', [
+            field('article', named('Article')),
+            field('articles', list(named('Article'))),
+            field('author', named('Author')),
+            field('authors', list(named('Author'))),
+            field('homePage', named('HomePage')),
+            field('mutualFunds', list(named('MutualFund'))),
+            field('themes', list(named('Theme'))),
+            field('uploadFiles', list(named('UploadFile'))),
+            field('usersPermissionsUsers', list(named('UsersPermissionsUser')))
+          ]),
+          objectType('Article', [
+            field('documentId', nonNull(named('ID'))),
+            field('title', nonNull(named('String'))),
+            field('accessTier', nonNull(named('ENUM_ARTICLE_ACCESSTIER'))),
+            field('cover', named('UploadFile')),
+            field('themes_connection', named('ThemeRelationResponseCollection')),
+            field('themes', nonNull(list(named('Theme')))),
+            field('author', named('Author')),
+            field('cta', named('ComponentContentCta')),
+            field('listedMutualFunds', list(named('MutualFund'))),
+            field('publishedAt', named('DateTime'))
+          ]),
+          objectType('Author', [
+            field('documentId', nonNull(named('ID'))),
+            field('name', nonNull(named('String')))
+          ]),
+          objectType('Theme', [
+            field('documentId', nonNull(named('ID'))),
+            field('uid', nonNull(named('String'))),
+            field('articles', list(named('Article')))
+          ]),
+          objectType('MutualFund', [
+            field('documentId', nonNull(named('ID'))),
+            field('name', named('String'))
+          ]),
+          objectType('UploadFile', [
+            field('documentId', nonNull(named('ID'))),
+            field('url', nonNull(named('String'))),
+            field('alternativeText', named('String'))
+          ]),
+          objectType('HomePage', [
+            field('documentId', nonNull(named('ID'))),
+            field('featuredArticle', named('Article'))
+          ]),
+          objectType('ComponentContentCta', [
+            field('label', named('String')),
+            field('url', named('String')),
+            field('icon', named('UploadFile'))
+          ]),
+          objectType('ThemeRelationResponseCollection', []),
+          objectType('UsersPermissionsUser', [
+            field('id', named('ID')),
+            field('username', named('String'))
+          ]),
+          enumType('ENUM_ARTICLE_ACCESSTIER', ['free', 'pro'])
+        ]
+      }
+    }
+  };
+}
 
 function objectType(name: string, fields: ReturnType<typeof field>[]) {
   return {

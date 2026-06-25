@@ -116,6 +116,11 @@ types to TypeScript interfaces, and turns object/list fields that point at other
 resources into `one()` and `many()` relations. Generated resource paths follow
 Strapi REST conventions, such as `articles`, `home-page`, and `upload/files`.
 
+By default, generated interfaces use an optimistic REST-friendly nullability mode:
+scalar and enum fields are emitted as required non-null properties, while
+object-valued component fields can still be `null`. To mirror GraphQL
+introspection nullability exactly, pass `--nullability graphql`.
+
 ## Type Helpers
 
 ```ts
