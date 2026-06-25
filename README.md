@@ -102,17 +102,13 @@ the TypeScript entity interfaces, relations, and schema registry from GraphQL
 introspection.
 
 ```sh
-strapi-query generate --graphql-url http://localhost:1337/graphql
+strapi-query generate --graphql-url http://localhost:1337/graphql --out ./src/strapi-schema.ts
 ```
-
-By default, the generator writes to `src/generated/strapi-schema.ts`, matching the
-common TypeScript convention of keeping generated source inside `src/generated`.
-Use `--out <file>` to choose a different path, or `--out -` to print to stdout.
 
 You can also generate from a saved introspection result:
 
 ```sh
-strapi-query generate --graphql ./graphql-introspection.json
+strapi-query generate --graphql ./graphql-introspection.json --out ./src/strapi-schema.ts
 ```
 
 The generator discovers resources from GraphQL `Query` fields, maps GraphQL object

@@ -389,9 +389,7 @@ function namedTypeToTypeScript(
   const type = types.get(name);
   if (type?.kind === 'ENUM') {
     const values = type.enumValues?.map((value) => value.name).filter((value): value is string => Boolean(value));
-    return values && values.length > 0
-      ? values.map((value) => JSON.stringify(normalizeGraphQlEnumValue(value))).join(' | ')
-      : 'string';
+    return values && values.length > 0 ? values.map((value) => JSON.stringify(value)).join(' | ') : 'string';
   }
 
   if (type?.kind === 'UNION') {
@@ -434,10 +432,6 @@ function unwrapType(type: IntrospectionTypeRef): NamedTypeRef {
   }
 
   throw new Error('GraphQL introspection type reference is incomplete.');
-}
-
-function normalizeGraphQlEnumValue(value: string) {
-  return value.replace(/_/g, ' ');
 }
 
 function pathFromQueryField(fieldName: string, kind: ResourceDescriptor['kind']) {
