@@ -63,7 +63,7 @@ describe('generateSchemaFromGraphQl', () => {
               field('id', named('ID')),
               field('username', named('String'))
             ]),
-            enumType('ENUM_ARTICLE_ACCESSTIER', ['free', 'pro'])
+            enumType('ENUM_ARTICLE_ACCESSTIER', ['free', 'pro_tier'])
           ]
         }
       }
@@ -71,7 +71,7 @@ describe('generateSchemaFromGraphQl', () => {
 
     expect(output).toContain('export interface Article {');
     expect(output).toContain('title: string;');
-    expect(output).toContain('accessTier: "free" | "pro";');
+    expect(output).toContain('accessTier: "free" | "pro tier";');
     expect(output).toContain('cta?: ComponentContentCta | null;');
     expect(output).toContain('publishedAt?: string | null;');
     expect(output).not.toContain('cover?:');
