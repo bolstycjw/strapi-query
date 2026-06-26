@@ -35,6 +35,7 @@ interface StrapiAttribute {
   components?: readonly string[];
   relation?: string;
   target?: string;
+  customField?: string;
 }
 
 interface ResourceDescriptor {
@@ -342,8 +343,9 @@ function attributeTypeToTypeScript(attribute: StrapiAttribute, context: RenderCo
       return nullable(attribute, 'boolean');
     case 'json':
     case 'blocks':
-    case 'customField':
       return nullable(attribute, 'unknown');
+    case 'customField':
+      return nullable(attribute, customFieldType(attribute));
     case 'enumeration':
       return nullable(attribute, enumType(attribute.enum));
     case 'component':
@@ -361,6 +363,10 @@ function attributeTypeToTypeScript(attribute: StrapiAttribute, context: RenderCo
 
 function enumType(values: readonly string[] | undefined) {
   return values && values.length > 0 ? values.map((value) => JSON.stringify(value)).join(' | ') : 'string';
+}
+
+function customFieldType(attribute: StrapiAttribute) {
+  return attribute.customField === 'plugin::ckeditor5.CKEditor' ? 'string' : 'unknown';
 }
 
 function componentType(attribute: StrapiAttribute, context: RenderContext) {

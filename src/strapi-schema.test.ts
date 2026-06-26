@@ -13,6 +13,7 @@ describe('generateSchemaFromStrapiSchemas', () => {
     expect(output).toContain('id: number;');
     expect(output).toContain('documentId: string;');
     expect(output).toContain('title: string;');
+    expect(output).toContain('body?: string | null;');
     expect(output).toContain('createdAt: string;');
     expect(output).toContain('updatedAt: string;');
     expect(output).toContain('publishedAt: string | null;');
@@ -70,6 +71,10 @@ function strapiSchemas() {
       path: 'src/api/article/content-types/article/schema.json',
       schema: contentTypeSchema('collectionType', 'article', 'articles', {
         title: stringAttribute({ required: true }),
+        body: {
+          type: 'customField',
+          customField: 'plugin::ckeditor5.CKEditor'
+        },
         rating: { type: 'integer' },
         accessTier: {
           type: 'enumeration',

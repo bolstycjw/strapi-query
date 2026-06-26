@@ -228,8 +228,9 @@ function attributeTypeToTypeScript(attribute, context) {
             return nullable(attribute, 'boolean');
         case 'json':
         case 'blocks':
-        case 'customField':
             return nullable(attribute, 'unknown');
+        case 'customField':
+            return nullable(attribute, customFieldType(attribute));
         case 'enumeration':
             return nullable(attribute, enumType(attribute.enum));
         case 'component':
@@ -246,6 +247,9 @@ function attributeTypeToTypeScript(attribute, context) {
 }
 function enumType(values) {
     return values && values.length > 0 ? values.map((value) => JSON.stringify(value)).join(' | ') : 'string';
+}
+function customFieldType(attribute) {
+    return attribute.customField === 'plugin::ckeditor5.CKEditor' ? 'string' : 'unknown';
 }
 function componentType(attribute, context) {
     const componentName = attribute.component ? context.componentByUid.get(attribute.component)?.typeName : undefined;
