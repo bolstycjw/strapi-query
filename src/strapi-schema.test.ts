@@ -13,16 +13,18 @@ describe('generateSchemaFromStrapiSchemas', () => {
     expect(output).toContain('id: number;');
     expect(output).toContain('documentId: string;');
     expect(output).toContain('title: string;');
-    expect(output).toContain('rating: number | null;');
+    expect(output).toContain('rating?: number | null;');
     expect(output).toContain('accessTier: "free" | "pro";');
-    expect(output).toContain('seo: ComponentSharedSeo | null;');
+    expect(output).toContain('seo?: ComponentSharedSeo | null;');
     expect(output).toContain(
-      'blocks: (ComponentSharedCta & { __component: "shared.cta" } | ComponentSharedHero & { __component: "shared.hero" })[];'
+      'blocks?: (ComponentSharedCta & { __component: "shared.cta" } | ComponentSharedHero & { __component: "shared.hero" })[];'
     );
+    expect(output).not.toContain('title?:');
+    expect(output).not.toContain('accessTier?:');
     expect(output).not.toContain('internalNotes');
     expect(output).not.toContain('themes: Theme[];');
     expect(output).toContain('export interface ComponentSharedCta {');
-    expect(output).toContain('icon: UploadFile | null;');
+    expect(output).toContain('icon?: UploadFile | null;');
     expect(output).toContain("article: collection('articles', {");
     expect(output).toContain("cover: one('uploadFile'),");
     expect(output).toContain("themes: many('theme'),");

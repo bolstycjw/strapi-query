@@ -293,7 +293,8 @@ function renderAttributeField(name: string, attribute: StrapiAttribute, context:
   const type = attributeTypeToTypeScript(attribute, context);
   if (!type) return undefined;
 
-  return `  ${quotePropertyIfNeeded(name)}: ${type};`;
+  const optional = attribute.required ? '' : '?';
+  return `  ${quotePropertyIfNeeded(name)}${optional}: ${type};`;
 }
 
 function attributeTypeToTypeScript(attribute: StrapiAttribute, context: RenderContext): string | undefined {
