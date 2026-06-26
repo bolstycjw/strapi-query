@@ -161,7 +161,8 @@ function renderResourceInterface(resource, context) {
         ...attributeEntries(resource.schema)
             .filter(([, attribute]) => shouldRenderResourceAttribute(attribute))
             .map(([name, attribute]) => renderAttributeField(name, attribute, context))
-            .filter((line) => Boolean(line))
+            .filter((line) => Boolean(line)),
+        ...managedTimestampFields(resource.schema)
     ];
     return renderInterface(resource.entityName, fields);
 }
@@ -183,6 +184,20 @@ function renderInterface(typeName, fields) {
 }
 function shouldRenderResourceAttribute(attribute) {
     return !attribute.private && attribute.type !== 'relation' && attribute.type !== 'media';
+}
+function managedTimestampFields(schema) {
+    const attributes = schema?.attributes ?? {};
+    const fields = [];
+    if (!attributes.createdAt) {
+        fields.push('  createdAt: string;');
+    }
+    if (!attributes.updatedAt) {
+        fields.push('  updatedAt: string;');
+    }
+    if (schema?.options?.draftAndPublish && !attributes.publishedAt) {
+        fields.push('  publishedAt: string | null;');
+    }
+    return fields;
 }
 function renderAttributeField(name, attribute, context) {
     const type = attributeTypeToTypeScript(attribute, context);

@@ -13,6 +13,9 @@ describe('generateSchemaFromStrapiSchemas', () => {
     expect(output).toContain('id: number;');
     expect(output).toContain('documentId: string;');
     expect(output).toContain('title: string;');
+    expect(output).toContain('createdAt: string;');
+    expect(output).toContain('updatedAt: string;');
+    expect(output).toContain('publishedAt: string | null;');
     expect(output).toContain('rating?: number | null;');
     expect(output).toContain('accessTier: "free" | "pro";');
     expect(output).toContain('seo?: ComponentSharedSeo | null;');
@@ -25,6 +28,7 @@ describe('generateSchemaFromStrapiSchemas', () => {
     expect(output).not.toContain('themes: Theme[];');
     expect(output).toContain('export interface ComponentSharedCta {');
     expect(output).toContain('icon?: UploadFile | null;');
+    expect(output).not.toContain('publishedAt?:');
     expect(output).toContain("article: collection('articles', {");
     expect(output).toContain("cover: one('uploadFile'),");
     expect(output).toContain("themes: many('theme'),");
@@ -97,7 +101,7 @@ function strapiSchemas() {
           type: 'text',
           private: true
         }
-      })
+      }, { draftAndPublish: true })
     },
     {
       path: 'src/api/author/content-types/author/schema.json',
@@ -152,7 +156,8 @@ function contentTypeSchema(
   kind: 'collectionType' | 'singleType',
   singularName: string,
   pluralName: string,
-  attributes: Record<string, unknown> = {}
+  attributes: Record<string, unknown> = {},
+  options: Record<string, unknown> = {}
 ) {
   return {
     kind,
@@ -162,6 +167,7 @@ function contentTypeSchema(
       pluralName,
       displayName: singularName
     },
+    options,
     attributes
   };
 }

@@ -18,6 +18,9 @@ interface StrapiSchema {
     pluralName?: string;
     displayName?: string;
   };
+  options?: {
+    draftAndPublish?: boolean;
+  };
   attributes?: Record<string, StrapiAttribute>;
 }
 
@@ -259,7 +262,8 @@ function renderResourceInterface(resource: ResourceDescriptor, context: RenderCo
     ...attributeEntries(resource.schema)
       .filter(([, attribute]) => shouldRenderResourceAttribute(attribute))
       .map(([name, attribute]) => renderAttributeField(name, attribute, context))
-      .filter((line): line is string => Boolean(line))
+      .filter((line): line is string => Boolean(line)),
+    ...managedTimestampFields(resource.schema)
   ];
 
   return renderInterface(resource.entityName, fields);
@@ -287,6 +291,25 @@ function renderInterface(typeName: string, fields: string[]) {
 
 function shouldRenderResourceAttribute(attribute: StrapiAttribute) {
   return !attribute.private && attribute.type !== 'relation' && attribute.type !== 'media';
+}
+
+function managedTimestampFields(schema: StrapiSchema | undefined) {
+  const attributes = schema?.attributes ?? {};
+  const fields: string[] = [];
+
+  if (!attributes.createdAt) {
+    fields.push('  createdAt: string;');
+  }
+
+  if (!attributes.updatedAt) {
+    fields.push('  updatedAt: string;');
+  }
+
+  if (schema?.options?.draftAndPublish && !attributes.publishedAt) {
+    fields.push('  publishedAt: string | null;');
+  }
+
+  return fields;
 }
 
 function renderAttributeField(name: string, attribute: StrapiAttribute, context: RenderContext) {
