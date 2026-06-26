@@ -1,26 +1,35 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from 'node:fs/promises';
 import { generateSchemaFromGraphQl, graphQlIntrospectionQuery } from './graphql.js';
+import { readStrapiSchemaFiles } from './strapi-schema-files.js';
+import { generateSchemaFromStrapiSchemas } from './strapi-schema.js';
 async function main() {
     const options = parseArgs(process.argv.slice(2));
     if (options.help) {
         console.log(usage());
         return;
     }
-    if (!options.graphql && !options.graphqlUrl) {
-        throw new Error('Pass --graphql <file> or --graphql-url <url>.');
+    const sourceCount = [options.graphql, options.graphqlUrl, options.strapiSchemas.length > 0]
+        .filter(Boolean)
+        .length;
+    if (sourceCount === 0) {
+        throw new Error('Pass --graphql <file>, --graphql-url <url>, or --strapi-schema <file-or-directory>.');
     }
-    if (options.graphql && options.graphqlUrl) {
-        throw new Error('Pass only one of --graphql or --graphql-url.');
+    if (sourceCount > 1) {
+        throw new Error('Pass only one schema source.');
     }
-    const document = options.graphql
-        ? JSON.parse(await readFile(options.graphql, 'utf8'))
-        : await fetchGraphQlIntrospection(options);
-    const output = generateSchemaFromGraphQl(document, {
-        ...(options.importFrom ? { importFrom: options.importFrom } : {}),
-        ...(options.schemaName ? { schemaExportName: options.schemaName } : {}),
-        ...(options.nullability ? { nullability: options.nullability } : {})
-    });
+    const output = options.strapiSchemas.length > 0
+        ? generateSchemaFromStrapiSchemas(await readStrapiSchemaFiles(options.strapiSchemas), {
+            ...(options.importFrom ? { importFrom: options.importFrom } : {}),
+            ...(options.schemaName ? { schemaExportName: options.schemaName } : {})
+        })
+        : generateSchemaFromGraphQl(options.graphql
+            ? JSON.parse(await readFile(options.graphql, 'utf8'))
+            : await fetchGraphQlIntrospection(options), {
+            ...(options.importFrom ? { importFrom: options.importFrom } : {}),
+            ...(options.schemaName ? { schemaExportName: options.schemaName } : {}),
+            ...(options.nullability ? { nullability: options.nullability } : {})
+        });
     if (options.out) {
         await writeFile(options.out, output);
         return;
@@ -28,7 +37,7 @@ async function main() {
     process.stdout.write(output);
 }
 function parseArgs(args) {
-    const options = { headers: {} };
+    const options = { headers: {}, strapiSchemas: [] };
     for (let index = 0; index < args.length; index += 1) {
         const arg = args[index];
         switch (arg) {
@@ -39,6 +48,9 @@ function parseArgs(args) {
                 break;
             case '--graphql-url':
                 options.graphqlUrl = readValue(args, ++index, arg);
+                break;
+            case '--strapi-schema':
+                options.strapiSchemas.push(readValue(args, ++index, arg));
                 break;
             case '--out':
                 options.out = readValue(args, ++index, arg);
@@ -114,10 +126,12 @@ function usage() {
     return `Usage:
   strapi-query generate --graphql ./graphql-introspection.json --out ./src/strapi-schema.ts
   strapi-query generate --graphql-url https://cms.example.com/graphql --token $STRAPI_TOKEN --out ./src/strapi-schema.ts
+  strapi-query generate --strapi-schema ./src --out ./src/strapi-schema.ts
 
 Options:
   --graphql <file>       Read a GraphQL introspection JSON result from disk.
   --graphql-url <url>    Fetch GraphQL introspection from an endpoint.
+  --strapi-schema <path> Read Strapi schema JSON files from a file or directory. May be repeated.
   --out <file>           Write generated TypeScript to a file. Defaults to stdout.
   --token <token>        Bearer token for --graphql-url.
   --header "Name: Val"   Extra fetch header for --graphql-url. May be repeated.

@@ -8,6 +8,7 @@ export {
 	single
 } from './public-api.js';
 export { generateSchemaFromGraphQl, graphQlIntrospectionQuery } from './graphql.js';
+export { generateSchemaFromStrapiSchemas } from './strapi-schema.js';
 
 export type {
   CollectionResource,
@@ -33,6 +34,7 @@ export type {
   StrapiSingleResponse
 } from './types.js';
 export type { GenerateSchemaFromGraphQlOptions, GenerateSchemaNullability } from './graphql.js';
+export type { GenerateSchemaFromStrapiSchemasOptions, StrapiSchemaDocument } from './strapi-schema.js';
 
 export { StrapiHttpError } from './errors.js';
 export { stringifyQuery } from './query-string.js';

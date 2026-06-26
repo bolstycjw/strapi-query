@@ -95,11 +95,21 @@ const articles = await strapi.collection('article').findMany({
 The response type is inferred from the schema and `populate` object. Runtime records
 do not contain fake relation metadata.
 
-## Generate a Schema from GraphQL
+## Generate a Schema
 
-If your Strapi project has the GraphQL plugin enabled, `strapi-query` can generate
-the TypeScript entity interfaces, relations, and schema registry from GraphQL
-introspection.
+`strapi-query` can generate the TypeScript entity interfaces, relations, and
+schema registry directly from Strapi schema files:
+
+```sh
+strapi-query generate --strapi-schema ./src --out ./src/strapi-schema.ts
+```
+
+Pass a Strapi project `src` directory to discover content type
+`schema.json` files and component JSON files automatically. You can also pass
+individual files or repeat `--strapi-schema`.
+
+If your Strapi project has the GraphQL plugin enabled, you can still generate
+from GraphQL introspection.
 
 ```sh
 strapi-query generate --graphql-url http://localhost:1337/graphql --out ./src/strapi-schema.ts
